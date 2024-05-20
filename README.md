@@ -1,7 +1,5 @@
 # trx
 
-# Balance Withdrawal Processing with PySpark
-
 This project processes balance withdrawals using PySpark. It reads balance and withdrawal data from CSV files, processes the withdrawals, and outputs the results.
 
 ## Requirements
