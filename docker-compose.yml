@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+  spark-master:
+    image: bitnami/spark:3.5.1
+    container_name: spark-master
+    hostname: spark-master
+    ports:
+      - 8080:8080
+      - 7077:7077
+    environment:
+      - SPARK_MODE=master
+    volumes:
+      - ./test/data:/mnt/data
+    networks:
+      - spark-network
+
+  spark-worker:
+    image: bitnami/spark:3.5.1
+    depends_on:
+      - spark-master
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+    volumes:
+      - ./test/data:/mnt/data
+    deploy:
+      mode: replicated
+      replicas: 3
+    networks:
+      - spark-network
+
+  spark-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spark-app
+    command: ["python", "-u", "/mnt/main.py"]
+    depends_on:
+      - spark-master
+      - spark-worker
+    volumes:
+      - ./main.py:/mnt/main.py
+      - ./test/data:/mnt/data
+    networks:
+      - spark-network
+
+networks:
+  spark-network:
+    driver: bridge
